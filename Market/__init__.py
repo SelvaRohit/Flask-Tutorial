@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///market.db'
@@ -8,6 +9,7 @@ app.config['SECRET_KEY']='80854d81e0d43c51e0aa3225'
 from flask_sqlalchemy import SQLAlchemy
 db=SQLAlchemy(app=app)
 bcrypt=Bcrypt(app=app)
+login_manager=LoginManager(app=app)
 from Market import routes 
 
 with app.app_context():

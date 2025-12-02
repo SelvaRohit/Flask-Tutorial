@@ -1,4 +1,5 @@
 from Market import db,bcrypt
+from flask_login import UserMixin
 
 class Item(db.Model):   
     # __table__='shop_items'
@@ -10,7 +11,7 @@ class Item(db.Model):
     owner=db.Column(db.Integer(),db.ForeignKey('user.id'))
 
 
-class User(db.Model):
+class User(db.Model,UserMixin):
     id=db.Column(db.Integer(),primary_key=True)
     UserName=db.Column(db.String(length=30),nullable=False,unique=True)
     email_address=db.Column(db.String(),nullable=False,unique=True)
@@ -26,3 +27,7 @@ class User(db.Model):
     @password.setter
     def password(self,plain_text_password):
         self.password_hash=bcrypt.generate_password_hash(plain_text_password).decode('Utf-8')
+
+    def check_password_correction(self,attempted_password):
+        return bcrypt.check_password_hash(self.password_hash,attempted_password)
+        #returns True if the we pass the corrcetion password of this particular user object
