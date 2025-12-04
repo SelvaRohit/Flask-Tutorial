@@ -2,7 +2,7 @@ from Market import app,db,login_manager
 from flask import render_template,redirect,url_for, flash
 from Market.models import Item,User
 from Market.forms import RegisterForm,LoginForm
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -16,6 +16,7 @@ def home_page():
 def about_page(username):
     return f'<h1>This is the about page of {username}'
 @app.route('/market')
+@login_required
 def market_page():
     items = Item.query.all()
     return render_template('market.html',items=items)
@@ -29,6 +30,10 @@ def register_page():
                             password=form.password1.data)
         db.session.add(user_to_create)
         db.session.commit()
+        login_user(user_to_create) #sets the session, current user and remembers.
+        flash(f'Account created Successfully! You are logged in as: {user_to_create.UserName}',category='success')
+        
+
         return redirect(url_for('market_page'))
     if form.errors !={}: #If there are not error from the validations
         for err_msg in form.errors.values():
@@ -43,10 +48,17 @@ def login_page():
         attempted_user=User.query.filter_by(UserName=form.username.data).first()
         # The first() method is used to get the object of the User from the database
         if attempted_user and attempted_user.check_password_correction(attempted_password=form.password.data):
-            login_user(attempted_user)
+            login_user(attempted_user) #sets the session, current user and remembers.
             flash(f'Success! You are logged in as: {attempted_user.UserName}',category='success')
             return redirect(url_for('market_page'))
         else:
             flash(f'Username/Password is incorrect! Please try again',category='danger')
 
     return render_template('login.html',form=form)
+
+
+@app.route('/logout')
+def logout_page():
+    logout_user()
+    flash(f'You have been logged out!!!',category='info')
+    return redirect(url_for('home_page'))

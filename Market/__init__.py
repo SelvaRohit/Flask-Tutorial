@@ -10,6 +10,10 @@ from flask_sqlalchemy import SQLAlchemy
 db=SQLAlchemy(app=app)
 bcrypt=Bcrypt(app=app)
 login_manager=LoginManager(app=app)
+login_manager.login_view='login_page' 
+login_manager.login_message_category='info'
+# login_view is the in-built attribute which is responsible to check the login credientials before accessing any routes
+# which is under @login_required decorator. If login is not present, then it routes to the page where login_view has. 
 from Market import routes 
 
 with app.app_context():
