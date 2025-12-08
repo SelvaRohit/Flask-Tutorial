@@ -10,13 +10,18 @@ class Item(db.Model):
     description=db.Column(db.String(length=10240),nullable=False,unique=True)
     owner=db.Column(db.Integer(),db.ForeignKey('user.id'))
 
+    def buy(self,user):
+        self.owner=user.id
+        user.budget -= self.price
+        db.session.commit()
+
 
 class User(db.Model,UserMixin):
     id=db.Column(db.Integer(),primary_key=True)
     UserName=db.Column(db.String(length=30),nullable=False,unique=True)
     email_address=db.Column(db.String(),nullable=False,unique=True)
     password_hash=db.Column(db.String(),nullable=False)
-    budget=db.Column(db.Integer(),default=1000, nullable=False)
+    budget=db.Column(db.Integer(),default=100000, nullable=False)
     items=db.relationship('Item',backref='owned_user',lazy=True)
 
     @property
@@ -34,7 +39,13 @@ class User(db.Model,UserMixin):
     @password.setter
     def password(self,plain_text_password):
         self.password_hash=bcrypt.generate_password_hash(plain_text_password).decode('Utf-8')
+    
 
     def check_password_correction(self,attempted_password):
         return bcrypt.check_password_hash(self.password_hash,attempted_password)
         #returns True if the we pass the corrcetion password of this particular user object
+    
+    def can_purchase(self,item_obj):
+        return self.budget >=item_obj.price
+    
+    
